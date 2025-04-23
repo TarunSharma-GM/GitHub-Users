@@ -1,13 +1,14 @@
 const getUsername = document.querySelector("#user") as HTMLInputElement;
 const formSubmit = document.querySelector("#form") as HTMLFormElement;
 const main_container = document.querySelector(".main_container") as HTMLElement;
+const GITHUBURL = "https://api.github.com/users";
 
 interface UserData {
     id:number;
     login:string;
     avatar_url:string;
     location:string;
-    html_url:String
+    html_url:string
 }
 
 async function myCustomFetcher<T>(url:string, options?:RequestInit):Promise<T>{
@@ -15,15 +16,12 @@ async function myCustomFetcher<T>(url:string, options?:RequestInit):Promise<T>{
     if(!response.ok) {
         throw new Error(`Network Response was not ok - status:${response.status}`);
     }
-
     const data = await response.json();
-    // console.log(data);
     return data;
 }
 
 const showResultUI = (singleUser:UserData) => {
     const {avatar_url, login, html_url} = singleUser;
-    console.log(html_url)
     main_container.insertAdjacentHTML(
         "beforeend",
         `<div class='card'>
@@ -43,36 +41,34 @@ function fetchUserData(url:string){
     myCustomFetcher<UserData[]>(url,{}).then((userInfo)=>{
         for(const singleUser of userInfo) {
             showResultUI(singleUser);
-            // console.log("login "+singleUser.login);
         }
     });
 }
 
-fetchUserData("https://api.github.com/users");
+fetchUserData(GITHUBURL);
 
 formSubmit.addEventListener("submit", async(e)=>{
     e.preventDefault();
     const searchTerm = getUsername.value.toLowerCase();
-    try{
-        const url = "https://api.github.com/users";
-        const allUserData = await myCustomFetcher<UserData[]>(url,{});
-        const matchingUsers = allUserData.filter((user)=>{
-            return user.login.toLowerCase().includes(searchTerm);
-        });
-
-        main_container.innerHTML = "";
-        if(matchingUsers.length === 0){
-            main_container?.insertAdjacentHTML(
-                "beforeend",
-                `<p class="empty-msg">No matchingusers found.</p>`
-            )
-        }
-        else{
-            for(const singleUser of matchingUsers){
-                showResultUI(singleUser);
+    if(searchTerm.length === 0){
+        fetchUserData(GITHUBURL);
+    }
+    else{
+        try{
+            const allUserData = await myCustomFetcher<UserData>(`${GITHUBURL}/${searchTerm}`,{});
+            main_container.innerHTML = "";
+            if(!allUserData){
+                main_container?.insertAdjacentHTML(
+                    "beforeend",
+                    `<p class="empty-msg">No matchingusers found. Provide exact username.</p>`
+                )
             }
+            else{
+                showResultUI(allUserData);
+            }
+        } 
+        catch(error) {
+            console.log(error)
         }
-    } catch(error) {
-        console.log(error)
     }
 });
