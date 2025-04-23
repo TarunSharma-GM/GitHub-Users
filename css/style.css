@@ -36,8 +36,8 @@ section {
 input {
   width: 25rem;
   height: 5rem;
-  border: #81a7e0 solid 0.4rem;
-  border-radius: 0.5rem;
+  border: #81a7e0 solid 0.2rem;
+  border-radius: 0.9rem;
   font-size: 1.8rem;
   margin-right: 2rem;
 }
@@ -77,8 +77,8 @@ img {
 }
 
 .username {
-  padding-top: 1rem;
-  color: #fff;
+  padding-left: 1rem;
+  color: #000000;
 }
 
 hr {
