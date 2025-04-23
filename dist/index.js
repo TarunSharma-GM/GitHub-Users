@@ -5,9 +5,6 @@ const main_container = document.querySelector(".main_container");
 const GITHUBURL = "https://api.github.com/users";
 async function myCustomFetcher(url, options) {
     const response = await fetch(url, options);
-    if (!response.ok) {
-        throw new Error(`Network Response was not ok - status:${response.status}`);
-    }
     const data = await response.json();
     return data;
 }
@@ -36,14 +33,16 @@ formSubmit.addEventListener("submit", async (e) => {
     e.preventDefault();
     const searchTerm = getUsername.value.toLowerCase();
     if (searchTerm.length === 0) {
+        main_container?.querySelector(".empty-msg")?.remove();
         fetchUserData(GITHUBURL);
     }
     else {
         try {
-            const allUserData = await myCustomFetcher(`${GITHUBURL}/${searchTerm}`, {});
+            let allUserData = await myCustomFetcher(`${GITHUBURL}/${searchTerm}`, {});
+            console.log(allUserData);
             main_container.innerHTML = "";
-            if (!allUserData) {
-                main_container?.insertAdjacentHTML("beforeend", `<p class="empty-msg">No matchingusers found. Provide exact username.</p>`);
+            if (allUserData.status === '404') {
+                main_container?.insertAdjacentHTML("beforeend", `<p class="empty-msg">No matching user found. Please provide exact username</p>`);
             }
             else {
                 showResultUI(allUserData);
