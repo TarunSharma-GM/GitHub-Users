@@ -8,14 +8,12 @@ interface UserData {
     login:string;
     avatar_url:string;
     location:string;
-    html_url:string
+    html_url:string;
+    status?:string;
 }
 
 async function myCustomFetcher<T>(url:string, options?:RequestInit):Promise<T>{
     const response = await fetch(url, options);
-    if(!response.ok) {
-        throw new Error(`Network Response was not ok - status:${response.status}`);
-    }
     const data = await response.json();
     return data;
 }
@@ -51,20 +49,22 @@ formSubmit.addEventListener("submit", async(e)=>{
     e.preventDefault();
     const searchTerm = getUsername.value.toLowerCase();
     if(searchTerm.length === 0){
+        main_container?.querySelector(".empty-msg")?.remove();
         fetchUserData(GITHUBURL);
     }
     else{
         try{
-            const allUserData = await myCustomFetcher<UserData>(`${GITHUBURL}/${searchTerm}`,{});
+            let allUserData = await myCustomFetcher<UserData>(`${GITHUBURL}/${searchTerm}`,{});
+            console.log(allUserData)
             main_container.innerHTML = "";
-            if(!allUserData){
+            if(allUserData.status === '404'){
                 main_container?.insertAdjacentHTML(
                     "beforeend",
-                    `<p class="empty-msg">No matchingusers found. Provide exact username.</p>`
+                    `<p class="empty-msg">No matching user found. Please provide exact username</p>`
                 )
             }
             else{
-                showResultUI(allUserData);
+                    showResultUI(allUserData);
             }
         } 
         catch(error) {
